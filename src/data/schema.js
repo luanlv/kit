@@ -14,30 +14,34 @@ import {
 
 // import me from './queries/me';
 import news from './queries/news';
-import userQueries from './models/user/userQueries'
-let user = userQueries.user
-let userId = userQueries.userId
-let users = userQueries.users
-let listUser = userQueries.listUser
-import userMutations from './models/user/userMutations'
+import imageQueries from './models/image/queries'
+import userQueries from './models/user/queries'
+import settingQueries from './models/setting/queries'
+
+// mutation
+import settingMutation from './models/setting/mutations'
+
+let {listImage} = imageQueries
+let { users } = userQueries
+let { setting } = settingQueries
 
 const schema = new Schema({
   query: new ObjectType({
     name: 'Query',
     fields: {
+      setting,
       news,
-      user,
-      userId,
-      users,
-      listUser
+      listImage,
+      users
     },
   }),
   mutation: new ObjectType({
     name: 'Mutation',
     description: 'Realize Root Mutations',
     fields: {
-      addUser: userMutations.addUser,
-      updateUser: userMutations.updateUser
+      // addUser: userMutations.addUser,
+      // updateUser: userMutations.updateUser
+      updateSetting: settingMutation.update
     },
   }),
 });

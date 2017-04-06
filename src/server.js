@@ -30,12 +30,16 @@ import assets from './assets.json'; // eslint-disable-line import/no-unresolved
 import Promise from 'bluebird'
 import configureStore from './store/configureStore';
 import { setRuntimeVariable } from './actions/runtime';
+import { setSetting } from './actions/setting';
 import { port, auth, mongoDBURL} from './config';
+const session = require('express-session')
+const MongoStore = require('connect-mongo')(session)
 
 //mongoose
 import mongoose from 'mongoose'
 mongoose.Promise = Promise;
 connect()
+const Setting = mongoose.model('Setting')
 // var User =  mongoose.model('User', require('./data/models/user/userSchema'))
 //end
 
@@ -56,35 +60,29 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
+app.use(session({
+  cookie: { maxAge: (24*3600*1000*30)},
+  resave: true,
+  saveUninitialized: false,
+  secret: 'luuVANluan',
+  ttl: 7 * 24 * 60 * 60,
+  store: new MongoStore({ mongooseConnection: mongoose.connection })
+}))
+app.use(passport.initialize())
+app.use(passport.session())
+app.use(cookieParser())
 //
 // Authentication
 // -----------------------------------------------------------------------------
-app.use(expressJwt({
-  secret: auth.jwt.secret,
-  credentialsRequired: false,
-  getToken: req => req.cookies.id_token,
-}));
-app.use(passport.initialize());
 
 if (__DEV__) {
   app.enable('trust proxy');
 }
-app.get('/login/facebook',
-  passport.authenticate('facebook', { scope: ['email', 'user_location'], session: false }),
-);
-app.get('/login/facebook/return',
-  passport.authenticate('facebook', { failureRedirect: '/login', session: false }),
-  (req, res) => {
-    const expiresIn = 60 * 60 * 24 * 180; // 180 days
-    const token = jwt.sign(req.user, auth.jwt.secret, { expiresIn });
-    res.cookie('id_token', token, { maxAge: 1000 * expiresIn, httpOnly: true });
-    res.redirect('/');
-  },
-);
 
-app.use('/api', require('./api'))
-
+app.use('/image', require('./serverRoute/image'))
+app.use('/api', require('./serverRoute/api'))
+app.use('/upload', require('./serverRoute/upload'))
+app.use('/auth', require('./serverRoute/auth'))
 //
 // Register API middleware
 // -----------------------------------------------------------------------------
@@ -99,19 +97,22 @@ app.use('/graphql', expressGraphQL(req => ({
 //
 // Register server-side rendering middleware
 // -----------------------------------------------------------------------------
+
 app.get('*', async (req, res, next) => {
   try {
+    let setting = await Setting.findOne({})
     const store = configureStore({
       user: req.user || null,
     }, {
       cookie: req.headers.cookie,
     });
-
+    store.dispatch(setSetting({
+      value: setting.ssr
+    }))
     store.dispatch(setRuntimeVariable({
       name: 'initialNow',
       value: Date.now(),
     }));
-
     const css = new Set();
 
     // Global (context) variables that can be easily accessed from any React component
@@ -140,7 +141,13 @@ app.get('*', async (req, res, next) => {
     }
 
     const data = { ...route };
-    data.children = ReactDOM.renderToString(<App context={context}>{route.component}</App>);
+
+    if(data.disableSSR || !store.getState().setting.ssr) {
+      data.children = '';
+    } else {
+      data.children = ReactDOM.renderToString(<App context={context}>{route.component}</App>);
+    }
+
     data.styles = [
       { id: 'css', cssText: [...css].join('') },
     ];

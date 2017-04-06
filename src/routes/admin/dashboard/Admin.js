@@ -9,8 +9,7 @@
 
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import s from './Admin.css';
-
+import { Button, DatePicker} from 'antd';
 class Admin extends React.Component {
   static propTypes = {
     title: PropTypes.string.isRequired,
@@ -18,14 +17,12 @@ class Admin extends React.Component {
 
   render() {
     return (
-      <div className={s.root}>
-        <div className={s.container}>
+        <div>
           <h1>{this.props.title}</h1>
-          <p>...</p>
+          <a href="/auth/facebook"><Button type="primary">Button</Button></a>
         </div>
-      </div>
     );
   }
 }
 
-export default withStyles(s)(Admin);
+export default Admin

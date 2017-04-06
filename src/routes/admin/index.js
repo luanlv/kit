@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import Layout from '../../components/Layout';
+// import Layout from '../../components/Layout';
 
 const title = 'Admin Page';
 const isAdmin = false;
@@ -16,19 +16,17 @@ const isAdmin = false;
 export default {
 
   path: '/admin',
+  children : [
+    require('./dashboard').default,
+    require('./library').default,
+    require('./setting').default,
+  ],
+  async action({next}) {
+    const route = await next();
 
-  async action() {
-    if (!isAdmin) {
-      return { redirect: '/login' };
-    }
-
-    const Admin = await require.ensure([], require => require('./Admin').default, 'admin');
-
-    return {
-      title,
-      chunk: 'admin',
-      component: <Layout><Admin title={title} /></Layout>,
-    };
+    // Provide default values for title, description etc.
+    route.title = `${route.title || 'Amdmin Page'}`;
+    return route;
   },
 
 };

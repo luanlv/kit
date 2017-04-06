@@ -9,9 +9,8 @@
 
 import React from 'react';
 import Layout from '../../components/Layout';
-import Contact from './Contact';
-import fetch from '../../core/fetch';
-import { showLoading, hideLoading } from 'react-redux-loading-bar'
+// import Contact from './Contact';
+
 const title = 'Contact Us';
 
 export default {
@@ -19,23 +18,10 @@ export default {
   path: '/contact',
 
   async action({store}) {
-    store.dispatch(showLoading())
-    const resp = await fetch('/graphql', {
-      method: 'post',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: '{news{title,link,content}users{id}}',
-      }),
-      credentials: 'include',
-    });
-    const data = await resp.json();
-    store.dispatch(hideLoading())
-    console.log(data)
+    const Contact = await require.ensure([], require => require('./Contact').default, 'contact');
     return {
       title,
+      chunk: 'contact',
       component: <Layout><Contact title={title} /></Layout>,
     };
   },
