@@ -65,7 +65,7 @@ const config = {
             'react',
             // Optimize React code for the production build
             // https://github.com/thejameskyle/babel-react-optimize
-            ...isDebug ? [] : ['react-optimize'],
+            // ...isDebug ? [] : ['react-optimize'],
           ],
           plugins: [
             // Adds component stack to warning messages

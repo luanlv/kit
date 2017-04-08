@@ -15,10 +15,8 @@ module.exports = model;
 
 
 module.exports.getSetting = () => {
-  console.log('getSetting')
   return new Promise((resolve, reject) => {
     model.findOne({}).exec((err, res) => {
-      console.log(res)
       err ? reject(err) : resolve(res);
     });
   });

@@ -76,6 +76,15 @@ class App extends React.Component {
               </Link>
             </Menu.Item>
 
+            <Menu.Item key="Editor">
+              <Link to="/admin/editor">
+                <span>
+                  <Icon type="tool" />
+                  <span className="nav-text">Editor</span>
+                </span>
+              </Link>
+            </Menu.Item>
+
           </Menu>
         </Sider>
 

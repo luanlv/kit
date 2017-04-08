@@ -8,20 +8,15 @@
  */
 
 import React from 'react';
-import { showLoading, hideLoading } from 'react-redux-loading-bar'
-import fetch from '../../../core/fetch';
-// import moment from 'moment'
 
-const title = 'Library';
+const title = 'Editor';
 
 export default {
 
-  path: '/library',
+  path: '/editor',
 
-  async action({store}) {
-    store.dispatch(showLoading())
-    const {App, Library } = await require('../AdminRequire')
-    store.dispatch(hideLoading())
+  async action({query}) {
+    const {App, Editor } = await require('../AdminRequire')
     return {
       title,
       chunk: 'admin',
@@ -29,7 +24,7 @@ export default {
       component: <App
         name={title}
       >
-        <Library title={title} />
+        <Editor title={title} />
       </App>,
     };
   },

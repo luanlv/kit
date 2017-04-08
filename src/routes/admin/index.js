@@ -20,6 +20,7 @@ export default {
     require('./dashboard').default,
     require('./library').default,
     require('./setting').default,
+    require('./editor').default,
   ],
   async action({next}) {
     const route = await next();
