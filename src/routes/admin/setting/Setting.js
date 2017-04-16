@@ -12,6 +12,7 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { Button, DatePicker, Switch, Row, Col, message} from 'antd';
 import fetch from '../../../core/fetch';
 
+
 class Setting extends React.Component {
   static propTypes = {
     title: PropTypes.string.isRequired,

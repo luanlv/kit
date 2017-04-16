@@ -11,21 +11,22 @@ import path from 'path';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
-import expressJwt from 'express-jwt';
+
 import expressGraphQL from 'express-graphql';
 import jwt from 'jsonwebtoken';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
-import UniversalRouter from 'universal-router';
+// import UniversalRouter from 'universal-router';
 import PrettyError from 'pretty-error';
 import App from './components/App';
 import Html from './components/Html';
+import HtmlAdmin from './components/HtmlAdmin';
 import { ErrorPageWithoutStyle } from './routes/error/ErrorPage';
 import errorPageStyle from './routes/error/ErrorPage.css';
 import passport from './core/passport';
 import models from './data/models';
 import schema from './data/schema';
-import routes from './routes';
+import router from './core/router';
 import assets from './assets.json'; // eslint-disable-line import/no-unresolved
 import Promise from 'bluebird'
 import configureStore from './store/configureStore';
@@ -57,6 +58,9 @@ global.navigator.userAgent = global.navigator.userAgent || 'all';
 // Register Node.js middleware
 // -----------------------------------------------------------------------------
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/assets', (req, res) => {
+  res.sendStatus(400)
+})
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -99,15 +103,37 @@ app.use('/graphql', expressGraphQL(req => ({
 // -----------------------------------------------------------------------------
 
 app.get('*', async (req, res, next) => {
+  let routeUrl = req.originalUrl
+  let isAdmin = (routeUrl.slice(0,6) === '/admin')
+  console.log(isAdmin)
   try {
-    let setting = await Setting.findOne({})
+    // let setting = await Setting.findOne({})
     const store = configureStore({
+      data: {
+        post: {
+          needUpdate: true,
+          value: {}
+        },
+        foodNews: {
+          needUpdate: true,
+          value: {}
+        },
+        news: {
+          needUpdate: true,
+          value: {}
+        },
+        newsInCategory: {
+          needUpdate: true,
+          value: {}
+        },
+
+      },
       user: req.user || null,
     }, {
       cookie: req.headers.cookie,
     });
     store.dispatch(setSetting({
-      value: setting.ssr
+      value: true
     }))
     store.dispatch(setRuntimeVariable({
       name: 'initialNow',
@@ -129,7 +155,7 @@ app.get('*', async (req, res, next) => {
       store,
     };
 
-    const route = await UniversalRouter.resolve(routes, {
+    const route = await router.resolve({
       ...context,
       path: req.path,
       query: req.query,
@@ -151,6 +177,9 @@ app.get('*', async (req, res, next) => {
     data.styles = [
       { id: 'css', cssText: [...css].join('') },
     ];
+
+
+
     data.scripts = [
       assets.vendor.js,
       assets.client.js,
@@ -160,9 +189,15 @@ app.get('*', async (req, res, next) => {
       data.scripts.push(assets[route.chunk].js);
     }
 
-    const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
-    res.status(route.status || 200);
-    res.send(`<!doctype html>${html}`);
+    if(isAdmin){
+      const html = ReactDOM.renderToStaticMarkup(<HtmlAdmin {...data} isAdmin={isAdmin} />);
+      res.status(route.status || 200);
+      res.send(`<!doctype html>${html}`);
+    } else {
+      const html = ReactDOM.renderToStaticMarkup(<Html {...data} isAdmin={isAdmin} />);
+      res.status(route.status || 200);
+      res.send(`<!doctype html>${html}`);
+    }
   } catch (err) {
     next(err);
   }
@@ -183,7 +218,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
       description={err.message}
       styles={[{ id: 'css', cssText: errorPageStyle._getCss() }]} // eslint-disable-line no-underscore-dangle
     >
-      {ReactDOM.renderToString(<ErrorPageWithoutStyle error={err} />)}
+    {ReactDOM.renderToString(<ErrorPageWithoutStyle error={err} />)}
     </Html>,
   );
   res.status(err.status || 500);

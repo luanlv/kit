@@ -9,6 +9,15 @@ gulp.task('sass', function () {
     .pipe(gulp.dest('./public/css'));
 });
 
-gulp.task('default', function () {
+
+gulp.task('sassAdmin', function () {
+  return gulp.src('./sassAdmin/**/*.scss')
+    .pipe(sass().on('error', sass.logError))
+    .pipe(gulp.dest('./public/css'));
+});
+
+
+gulp.task('default', ['sass','sassAdmin'], function () {
   gulp.watch('./sass/**/*.scss', ['sass']);
+  gulp.watch('./sassAdmin/**/*.scss', ['sassAdmin']);
 });

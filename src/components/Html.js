@@ -36,22 +36,21 @@ class Html extends React.Component {
     return (
       <html className="no-js" lang="en">
         <head>
-          <meta charSet="utf-8" />
-          <meta httpEquiv="x-ua-compatible" content="ie=edge" />
-          <title>{title}</title>
-          <meta name="description" content={description} />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-          <link rel="stylesheet" type="text/css"  href="/css/app.css" />
-          {styles.map(style =>
-            <style
-              key={style.id}
-              id={style.id}
-              // eslint-disable-next-line react/no-danger
-              dangerouslySetInnerHTML={{ __html: style.cssText }}
-            />,
-          )}
+            <meta charSet="utf-8" />
+            <meta httpEquiv="x-ua-compatible" content="ie=edge" />
+            <title>{title}</title>
+            <meta name="description" content={description} />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <meta name="referrer" content="unsafe-url" />
+            <meta name="referrer" content="origin" />
+            <meta name="referrer" content="no-referrer-when-downgrade" />
+            <meta name="referrer" content="origin-when-cross-origin" />
+            {/*<meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />*/}
+            <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+            <link rel="stylesheet" type="text/css"  href="/css/app.css" />
         </head>
+
         <body>
           <div
             id="app"
@@ -65,6 +64,7 @@ class Html extends React.Component {
               `window.APP_STATE=${serialize(state, { isJSON: true })}` }}
             />
           )}
+
           {scripts.map(script => <script key={script} src={script} />)}
           {analytics.google.trackingId &&
             <script

@@ -21,6 +21,8 @@ export default {
     require('./library').default,
     require('./setting').default,
     require('./editor').default,
+    require('./news').default,
+    require('./monngon').default,
   ],
   async action({next}) {
     const route = await next();

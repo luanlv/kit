@@ -12,6 +12,7 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import {Icon, Input, Button, DatePicker, Row, Col, Card, Upload, message, Modal} from 'antd';
 import fetch from '../../../core/fetch';
 var Waypoint = require('react-waypoint');
+import CopyToClipboard from 'react-copy-to-clipboard';
 
 const Dragger = Upload.Dragger;
 
@@ -31,6 +32,8 @@ class Library extends React.Component {
   constructor (props) {
     super(props)
     this.state = {
+      copyImageUrl: 'abc',
+      copied: false,
       uploadArea: false,
       visible: false,
       filter: '',
@@ -56,16 +59,18 @@ class Library extends React.Component {
     const {data} = await resp.json();
 
     this.setState(prevState => {
-      let newImgs;
-      if(reset){
-        newImgs = data.listImage
-      } else {
-        newImgs = prevState.imgs.concat(data.listImage)
-      }
-      return {
-        ...prevState,
-        imgs: newImgs,
-        time: newImgs[newImgs.length-1].created_at
+      if(data.listImage.length > 0) {
+        let newImgs;
+        if (reset) {
+          newImgs = data.listImage
+        } else {
+          newImgs = prevState.imgs.concat(data.listImage)
+        }
+        return {
+          ...prevState,
+          imgs: newImgs,
+          time: newImgs[newImgs.length - 1].created_at
+        }
       }
     })
   }
@@ -182,7 +187,7 @@ class Library extends React.Component {
                     <Card bordered={false} className="imgWr"
                       onClick={() => this.showModal(el)}
                     >
-                      <img src={"/image/" + el.name} />
+                      <img src={"/image/small/" + el.name} />
                     </Card>
                   </Col>
                 )
@@ -213,7 +218,6 @@ class Library extends React.Component {
                 lg={12}
               >
                 {this.state.selectedImage.name && <Card bordered={false} className="imgWr"
-                      onClick={() => this.showModal(el)}
                 >
                   <img src={"/image/" + this.state.selectedImage.name} />
                 </Card>}
@@ -249,6 +253,20 @@ class Library extends React.Component {
                     <b>Kích thước:</b> {this.state.selectedImage.dimensions.width} × {this.state.selectedImage.dimensions.height}
                   </div>
                 }
+                <b>Link :</b> {this.state.copied ? <span style={{color: 'red'}}>Copied !"</span> : <span style={{color: 'blue'}}>
+                  {"/image/" + this.state.selectedImage.name}
+                </span>}
+                <br/>
+                <CopyToClipboard text={"/image/" + this.state.selectedImage.name}
+                                 onCopy={() => {
+                                   this.setState({copied: true})
+                                   setTimeout(() => {
+                                     this.setState({copied: false})
+                                   }, 1000)
+                                 }
+                                 }>
+                  <button>Copy link ảnh</button>
+                </CopyToClipboard>
               </Col>
             </Row>
           </Modal>

@@ -1,35 +1,33 @@
-let mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-var schema = new mongoose.Schema({
-  id: { type:String },
-  ssr: {type: Boolean, default: true }
-  },
+const schema = new mongoose.Schema({
+  id: { type: String },
+  ssr: { type: Boolean, default: true },
+},
   {
-    collection : 'setting'
-  }
+    collection: 'setting',
+  },
 );
 
-let model = mongoose.model('Setting', schema);
+const model = mongoose.model('Setting', schema);
 
 module.exports = model;
 
 
-module.exports.getSetting = () => {
-  return new Promise((resolve, reject) => {
-    model.findOne({}).exec((err, res) => {
-      err ? reject(err) : resolve(res);
-    });
+module.exports.getSetting = () => new Promise((resolve, reject) => {
+  model.findOne({}).exec((err, res) => {
+    err ? reject(err) : resolve(res);
   });
-};
+});
 
-module.exports.update = (root, {ssr}) => {
-  let query = {}
-  if(ssr !== undefined) query.ssr = ssr
+module.exports.update = (root, { ssr }) => {
+  const query = {};
+  if (ssr !== undefined) query.ssr = ssr;
   return new Promise((resolve, reject) => {
     model.findOneAndUpdate(
       { id: 'setting' },
       { $set: query },
-      { returnNewDocument: true, new: true }
+      { returnNewDocument: true, new: true },
     ).exec((err, res) => {
       err ? reject(err) : resolve(res);
     });
